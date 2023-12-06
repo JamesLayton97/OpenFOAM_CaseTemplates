@@ -1,0 +1,15 @@
+#!/bin/bash
+
+
+for processor in processor*
+do
+	NAMEFILM=$processor"_film.vtk"
+	NAMEGROOVE=$processor"_groove.vtk"
+	cd $processor 
+	foamToVTK -region film3D -time 0
+	foamToVTK -region groove -time 0
+	cp -r VTK/film3D/processor* ../$NAMEFILM
+	cp -r VTK/groove/processor* ../$NAMEGROOVE
+	cd ..
+
+done

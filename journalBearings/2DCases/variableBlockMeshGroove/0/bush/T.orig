@@ -1,0 +1,119 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0/bush";
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform TAMBIENT;
+
+boundaryField
+{
+    bushwalls
+    {
+        type            externalWallHeatFluxTemperature;
+        mode            coefficient;
+        Ta              constant TAMBIENT;
+        h               uniform 100.0;
+        thicknessLayers ();
+        kappaLayers     ();
+
+        value           $internalField;
+
+	/*
+	refValue 	uniform 313;
+	refGradient 	uniform 0;
+	valueFraction 	uniform 0;
+
+	name		convectiveOuterWallBoundary;
+	
+	code
+	#{
+		scalarField& field = *this;
+		const scalarField internal = this->patchInternalField();
+		scalarField newField = field;
+
+		scalar k 		= 75;
+		scalar h 		= 50;
+
+		scalar Nu 		= -1*h/k;
+		scalar Ta		= 313;
+
+		forAll(field, i)
+		{
+			newField[i] = Nu*(internal[i] - Ta);
+		}
+
+		this->refGrad() = newField;	
+	#};
+	*/
+    }
+
+    bushgroove
+    {
+	//type 	fixedValue;
+	//value 	uniform 310;
+
+	type            externalWallHeatFluxTemperature;
+        mode            coefficient;
+        Ta              constant 310.0;
+        h               uniform 750.0;
+        thicknessLayers ();
+        kappaLayers     ();
+
+        value           $internalField;
+	/*
+        type 		codedMixed;
+	value 		uniform 310;
+
+	refValue 	uniform 310;
+	refGradient 	uniform 0;
+	valueFraction 	uniform 0;
+
+	name		convectiveInletBoundary;
+	
+	code
+	#{
+		scalarField& field = *this;
+		const scalarField internal = this->patchInternalField();
+		scalarField newField = field;
+
+		scalar k 		= 75;
+		scalar h 		= 1000;
+
+		scalar Nu	 	= -1*h/k;
+		scalar Ta		= 310;
+
+		forAll(field, i)
+		{
+			newField[i] = Nu*(field[i] - Ta);
+		}
+
+		this->refGrad() = newField;	
+
+		#};
+		*/
+    }
+
+    bush_to_film
+    {
+        type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        value           $internalField;
+	Tnbr            T;
+    }
+}
+
+
+// ************************************************************************* //

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+fluent3DMeshToFoam $1
+createPatch -dict system/createPatchDict -overwrite
+
+sed -i '54s/.*/\tsampleMode\tnearestPatchFaceAMI;\n\tsampleRegion    bush;\n\tsamplePatch      bush_to_groove;\n\t}/' constant/polyMesh/boundary
+sed -i '50s/.*/	 type 		mappedWall;/' constant/polyMesh/boundary
+
+sed -i '47s/.*/\tsampleMode\tnearestPatchFaceAMI;\n\tsampleRegion    film3D;\n\tsamplePatch      filmsides_to_groove;\n\t}/' constant/polyMesh/boundary
+sed -i '43s/.*/	 type 		mappedPatch;/' constant/polyMesh/boundary
+
+sed -i '40s/.*/\tsampleMode\tnearestPatchFaceAMI;\n\tsampleRegion    film3D;\n\tsamplePatch      filmoutlet_to_groove;\n\t}/' constant/polyMesh/boundary
+sed -i '36s/.*/	 type 		mappedPatch;/' constant/polyMesh/boundary
+
+sed -i '33s/.*/\tsampleMode\tnearestPatchFaceAMI;\n\tsampleRegion    film3D;\n\tsamplePatch      filminlet_to_groove;\n\t}/' constant/polyMesh/boundary
+sed -i '29s/.*/	 type 		mappedPatch;/' constant/polyMesh/boundary
+
+sed -i '26s/.*/\tsampleMode\tnearestPatchFaceAMI;\n\tsampleRegion    shaft;\n\tsamplePatch    	shaft_to_groove;\n\t}/' constant/polyMesh/boundary
+sed -i '22s/.*/	 type 		mappedWall;/' constant/polyMesh/boundary
+
+mv constant/polyMesh/* constant/groove/polyMesh/

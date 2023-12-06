@@ -1,0 +1,30 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      regionConvergence;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+filmTolerance   1e-4;
+filmRelTol	0.001;
+
+fluidTolerance	0;
+fluidRelTol	0;
+
+solidTolerance	1e-4;
+solidRelTol	0.001;
+
+shaftTolerance	1e-4;
+shaftRelTol	0.001;
+
+// ************************************************************************* //

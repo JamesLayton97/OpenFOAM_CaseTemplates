@@ -1,0 +1,4 @@
+#!/bin/bash
+
+blockMesh -dict system/blockMeshDict.bush
+mv constant/polyMesh constant/bush/

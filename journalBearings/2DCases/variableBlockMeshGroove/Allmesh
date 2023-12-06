@@ -1,0 +1,21 @@
+#!/bin/bash
+
+blockMesh -dict system/blockMeshDict.film
+cp -r constant/polyMesh constant/film/
+rm -rf constant/polyMesh
+
+blockMesh -dict system/blockMeshDict.film3D
+cp -r constant/polyMesh constant/film3D/
+rm -rf constant/polyMesh
+
+blockMesh -dict system/blockMeshDict.shaft
+cp -r constant/polyMesh constant/shaft/
+rm -rf constant/polyMesh
+
+blockMesh -dict system/blockMeshDict.bush
+cp -r constant/polyMesh constant/bush/
+rm -rf constant/polyMesh
+
+blockMesh -dict system/blockMeshDict.groove
+cp -r constant/polyMesh constant/groove/
+rm -rf constant/polyMesh

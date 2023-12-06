@@ -1,0 +1,26 @@
+#!/bin/bash
+
+ls | grep -E 'processor*' >| lsOutput.log
+
+procN=0
+
+for LINE in $(cat lsOutput.log); 
+do
+	filename=$(echo ${LINE} | awk '{ print $1}')
+
+	suffix="${filename##*[0-9]}"
+	number="${filename%"$suffix"}"
+	number="${number##*[!-0-9]}"
+
+	if [ $number -ge $procN ]
+	then
+		procN=$number
+	fi
+done
+
+(( procN++ ))
+
+rm -rf lsOutput.log
+
+mpirun -np $procN fullJournalSolver -parallel 
+reconstructPar -allRegions

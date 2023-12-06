@@ -1,0 +1,250 @@
+/*--------------------------------*-C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open SourceCFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+/*
+ * Blockmesh document to construct the mesh of the groove region.
+ * Geometry is a square shaped groove with a feed supply from the outer bush surface to the slit
+ * Input parameters are based o the angular width of the groove and a groove depth which draws a square slit
+ * Blocking system comprises of 3 blocks the height of the film, 3 slit blocks with define the remainder of the groove slit (i.e the large cavity at the base of the feed supply)
+ * and 1 feed supply block
+ */
+
+
+// COnverts mm to m
+convertToMeters         0.001;  
+
+// Meshing Dimensions
+xSide                   60;
+xMid                    50;
+xGrade1			0.2; 	// X-direction cell expansion ratio approaching the film inlet/outlet
+xGrade2			0.3;	// X-direction cell expansion ratio appraching center of the groove
+yFilm                   10;
+ySlit			60;
+yGrade1			0.1; 	// Y-directon cell expansion ratio approaching the film inlet/outlet 
+yGrade2			0.5; 	// Y-direction cell expanison ratio approaching to of slit
+yFeed			100;	
+yFeedGrade		0.05;	
+zMesh			1;
+
+// Bearing dimensions
+Ri                      50;
+Ro			100;
+hg			4;
+L                       0.1;
+c                       0.14;
+
+// Angular position variables for orientating arcs and vertex positions
+grooveAng		0.157;
+xg 			#calc "sin($grooveAng)";		// Angular coordinates of the groove inlet/outlet	
+yg			#calc "cos($grooveAng)";
+
+supplyAng		0.052;
+xs 			#calc "sin($supplyAng)";		// Angular coordinates of the base of the supply feed	
+ys			#calc "cos($supplyAng)";
+
+arcAng			#calc "$supplyAng + ($grooveAng - $supplyAng)/2";
+xa 			#calc "sin($arcAng)";			// Angular coordinates for positioning the arcs from the groove inlet/outlet to the supply feed	
+ya			#calc "cos($arcAng)";
+
+Yf			#calc "sqrt($Ro*$Ro - $xa*$xa)";	// Y coordinate of the top of the supply feed given the x position
+
+vertices
+(
+
+ 	// shaft boundary rear verticies 
+    (#calc "-1*$xg*$Ri" #calc "$yg*$Ri" 0)
+    (#calc "-1*$xs*$Ri" #calc "$ys*$Ri" 0)
+    (#calc "$xs*$Ri" #calc "$ys*$Ri" 0)
+    (#calc "$xg*$Ri" #calc "$yg*$Ri" 0)
+
+    	// Film height boundary rear verticies
+    (#calc "-1*$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" 0)
+    (#calc "-1*$xs*($Ri + $c)" #calc "$ys*($Ri + $c)" 0)
+    (#calc "$xs*($Ri + $c)" #calc "$ys*($Ri + $c)" 0)
+    (#calc "$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" 0)
+
+    	// Groove height boundary rear verticies
+    (#calc "-1*$xg*($Ri + $c + $hg)" #calc "$yg*($Ri + $c + $hg)" 0)
+    (#calc "-1*$xs*($Ri + $c + $hg)" #calc "$ys*($Ri + $c + $hg)" 0)
+    (#calc "$xs*($Ri + $c + $hg)" #calc "$ys*($Ri + $c + $hg)" 0)
+    (#calc "$xg*($Ri + $c + $hg)" #calc "$yg*($Ri + $c + $hg)" 0)
+
+    	// Supply top rear vertices
+    (#calc "-1*$xs*($Ri + $c + $hg)" #calc "$Yf" 0)
+    (#calc "$xs*($Ri + $c + $hg)" #calc "$Yf" 0)
+
+ 	// shaft boundary front verticies 
+    (#calc "-1*$xg*$Ri" #calc "$yg*$Ri" $L)
+    (#calc "-1*$xs*$Ri" #calc "$ys*$Ri" $L)
+    (#calc "$xs*$Ri" #calc "$ys*$Ri" $L)
+    (#calc "$xg*$Ri" #calc "$yg*$Ri" $L)
+
+    	// Film height boundary front verticies
+    (#calc "-1*$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" $L)
+    (#calc "-1*$xs*($Ri + $c)" #calc "$ys*($Ri + $c)" $L)
+    (#calc "$xs*($Ri + $c)" #calc "$ys*($Ri + $c)" $L)
+    (#calc "$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" $L)
+
+    	// Groove height boundary front verticies
+    (#calc "-1*$xg*($Ri + $c + $hg)" #calc "$yg*($Ri + $c + $hg)" $L)
+    (#calc "-1*$xs*($Ri + $c + $hg)" #calc "$ys*($Ri + $c + $hg)" $L)
+    (#calc "$xs*($Ri + $c + $hg)" #calc "$ys*($Ri + $c + $hg)" $L)
+    (#calc "$xg*($Ri + $c + $hg)" #calc "$yg*($Ri + $c + $hg)" $L)
+
+    	// Supply top front vertices
+    (#calc "-1*$xs*($Ri + $c + $hg)" #calc "$Yf" $L)
+    (#calc "$xs*($Ri + $c + $hg)" #calc "$Yf" $L)
+    
+);
+
+blocks
+(
+
+    hex (0 1 5 4 14 15 19 18) ($xSide $yFilm $zMesh) simpleGrading (((0.5 0.5 #calc "1/$xGrade1")(0.5 0.5 $xGrade2)) 1 1)						// Film Height left section
+    hex (1 2 6 5 15 16 20 19) ($xMid $yFilm $zMesh) simpleGrading (((0.5 0.5 #calc "1/$xGrade2")(0.5 0.5 $xGrade2)) 1 1) 						// Film height mid section
+    hex (2 3 7 6 16 17 21 20) ($xSide $yFilm $zMesh) simpleGrading (((0.5 0.5 #calc "1/$xGrade2")(0.5 0.5 $xGrade1)) 1 1)						// Film height right section
+
+    hex (4 5 9 8 18 19 23 22) ($xSide $ySlit $zMesh) simpleGrading (((0.5 0.5 #calc "1/$xGrade1")(0.5 0.5 $xGrade2)) ((0.5 0.7 #calc "1/$yGrade1")(0.5 0.3 $yGrade2)) 1) 		// Slit left section
+    hex (5 6 10 9 19 20 24 23) ($xMid $ySlit $zMesh) simpleGrading (((0.5 0.5 #calc "1/$xGrade2")(0.5 0.5 $xGrade2)) ((0.5 0.7 #calc "1/$yGrade1")(0.5 0.3 $yGrade2)) 1) 		// Slit mid section
+    hex (6 7 11 10 20 21 25 24) ($xSide $ySlit $zMesh) simpleGrading (((0.5 0.5 #calc "1/$xGrade2")(0.5 0.5 $xGrade1)) ((0.5 0.7 #calc "1/$yGrade1")(0.5 0.3 $yGrade2)) 1) 	// Slit right section
+
+    hex (9 10 13 12 23 24 27 26) ($xMid $yFeed $zMesh) simpleGrading (((0.5 0.5 #calc "1/$xGrade2")(0.5 0.5 $xGrade2)) #calc "1/$yFeedGrade" 1) 				// Feed supply
+
+);
+
+edges
+(
+
+    arc 0 1 (#calc "-1*$xa*$Ri" #calc "$ya*$Ri" 0)
+    arc 1 2 (0 #calc "$Ri" 0)
+    arc 2 3 (#calc "$xa*$Ri" #calc "$ya*$Ri" 0)
+    arc 4 5 (#calc "-1*$xa*($Ri + $c)" #calc "$ya*($Ri + $c)" 0)
+    arc 5 6 (0 #calc "($Ri + $c)" 0)
+    arc 6 7 (#calc "$xa*($Ri + $c)" #calc "$ya*($Ri + $c)" 0)
+    arc 8 9 (#calc "-1*$xa*($Ri + $c + $hg)" #calc "$ya*($Ri + $c + $hg)" 0)
+    arc 9 10 (0 #calc "($Ri + $c + $hg)" 0)
+    arc 10 11 (#calc "$xa*($Ri + $c + $hg)" #calc "$ya*($Ri + $c + $hg)" 0)
+
+    arc 14 15 (#calc "-1*$xa*$Ri" #calc "$ya*$Ri" $L)
+    arc 15 16 (0 #calc "$Ri" $L)
+    arc 16 17 (#calc "$xa*$Ri" #calc "$ya*$Ri" $L)
+    arc 18 19 (#calc "-1*$xa*($Ri + $c)" #calc "$ya*($Ri + $c)" $L)
+    arc 19 20 (0 #calc "($Ri + $c)" $L)
+    arc 20 21 (#calc "$xa*($Ri + $c)" #calc "$ya*($Ri + $c)" $L)
+    arc 22 23 (#calc "-1*$xa*($Ri + $c + $hg)" #calc "$ya*($Ri + $c + $hg)" $L)
+    arc 23 24(0 #calc "($Ri + $c + $hg)" $L)
+    arc 24 25 (#calc "$xa*($Ri + $c + $hg)" #calc "$ya*($Ri + $c + $hg)" $L)
+
+);
+
+boundary
+(
+
+    groove_to_shaft
+    {
+	    type 		mappedWall;
+	    sampleMode		nearestPatchFaceAMI;
+	    sampleRegion	shaft;
+	    samplePatch		shaft_to_groove;
+        faces
+        (
+	 	(0 1 15 14)
+		(1 2 16 15)
+		(2 3 17 16)
+        );
+    }
+
+    groove_to_bush
+    {
+	    type 		mappedWall;
+	    sampleMode		nearestPatchFaceAMI;
+	    sampleRegion	bush;
+	    samplePatch		bush_to_groove;
+        faces
+        (
+	 	(4 18 22 8)
+		(8 22 23 9)
+		(9 23 26 12)
+		(10 13 27 24)
+		(10 24 25 11)
+		(7 11 25 21)
+        );
+    }    
+
+    grooveSides
+    {
+    	type			wall;
+        faces
+        (
+	 	(0 4 5 1)
+		(1 5 6 2)
+		(2 6 7 3)
+	 	(4 8 9 5)
+		(5 9 10 6)
+		(6 10 11 7)
+		(9 12 13 10)
+		(14 15 19 18)
+		(15 16 20 19)
+		(16 17 21 20)
+		(18 19 23 22)
+		(19 20 24 23)
+		(20 21 25 24)
+		(23 24 27 26)
+        );
+    } 
+
+    groove_to_filminlet
+    {
+	    type 		mappedPatch;
+	    sampleMode		nearestPatchFaceAMI;
+	    sampleRegion	film3D;
+	    samplePatch		filminlet_to_groove;
+
+	    faces
+	    (
+	     	(0 14 18 4)
+	    );
+    }
+
+    groove_to_filmoutlet
+    {
+	    type 		mappedPatch;
+	    sampleMode		nearestPatchFaceAMI;
+	    sampleRegion	film3D;
+	    samplePatch		filmoutlet_to_groove;
+
+	    faces
+	    (
+	     	(3 7 21 17)
+	    );
+    }
+
+    groovesupply
+    {
+	    type 		patch;
+
+	    faces
+	    (
+	     	(12 26 27 13)
+	    );
+    }
+
+);
+
+mergePatchPairs
+(
+);
+// ************************************************************************* //

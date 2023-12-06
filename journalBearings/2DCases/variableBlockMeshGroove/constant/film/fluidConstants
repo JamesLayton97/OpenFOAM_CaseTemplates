@@ -1,0 +1,34 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      settings;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+BConst			5e7;
+BCav			1e7;
+muConst     		0.0277;
+muAirConst		1.918e-5;
+rhoConst    		860;
+rhoAirConst		1.127;
+cpConst 		2000;
+cpAirConst 		1000;
+kConst			0.13;
+kAirConst 		0.025;
+muTCoeff		(-0.04 323 0);
+muPCoeff		(0 0 0);
+PCav 	    		1000;
+TRef			313;
+dRhoT			0;
+
+// ************************************************************************* //

@@ -1,0 +1,63 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      k;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+kInlet		0.375;
+
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform $kInlet;
+
+boundaryField
+{
+    groove_to_filminlet
+    {
+        type            turbulentIntensityKineticEnergyInlet;
+	intensity	0.01;    
+	value 		$internalField;
+    }
+    groove_to_filmoutlet
+    {
+        type            turbulentIntensityKineticEnergyInlet;
+	intensity	0.01;
+	value		$internalField;
+    }
+    groovesides
+    {
+        type            zeroGradient;
+    }
+    groove_to_bush
+    {
+        type            kqRWallFunction;
+	value		$internalField;
+    }
+    groove_to_shaft
+    {
+        type            kqRWallFunction;
+	value		$internalField;
+    }
+    groovesupply
+    {
+        type            turbulentIntensityKineticEnergyInlet;
+	intensity	0.05;
+	value		$internalField;
+    }
+    "procBoundary.*"
+    {
+	type		processor;
+    }
+}
+
+// ************************************************************************* //

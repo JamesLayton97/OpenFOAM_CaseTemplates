@@ -1,0 +1,185 @@
+/*--------------------------------*-C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open SourceCFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// COnverts mm to m
+convertToMeters         0.001;  
+
+// Meshing Dimensions
+xMesh                   50;
+xMeshAdd		20; 		// Additional cells for grading in sections approaching film inlet/outlet 
+xGrade			0.05;
+yMesh                   1;
+zMesh                   1;
+
+// Bearing dimensions
+Ri                      50;
+L                       0.1;
+c                       0.14;
+
+// Angular coordinates for nodes and ars
+Coeff                   0.707107; 		// cos(45)
+
+grooveAng		0.157;
+xg 			#calc "sin($grooveAng)";	// Angular coordinates of the groove inlet/outlet	
+yg			#calc "cos($grooveAng)";
+
+
+vertices
+(
+
+ 	// Shaft boundary rear edges
+    (#calc "$xg*$Ri" #calc "$yg*$Ri" 0)
+    (#calc "$Ri" 0 0)
+    (0 #calc "-1*$Ri" 0) 
+    (#calc "-1*$Ri" 0 0)
+    (#calc "-1*$xg*$Ri" #calc "$yg*$Ri" 0)
+
+ 	// Bush boundary rear edges
+    (#calc "$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" 0)
+    (#calc "($Ri + $c)" 0 0)
+    (0 #calc "-1*($Ri + $c)" 0) 
+    (#calc "-1*($Ri + $c)" 0 0)
+    (#calc "-1*$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" 0)
+
+	// Shaft boundary front edges
+    (#calc "$xg*$Ri" #calc "$yg*$Ri" $L)
+    (#calc "$Ri" 0 $L)
+    (0 #calc "-1*$Ri" $L) 
+    (#calc "-1*$Ri" 0 $L)
+    (#calc "-1*$xg*$Ri" #calc "$yg*$Ri" $L)
+
+ 	// Bush boundary front edges
+    (#calc "$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" $L)
+    (#calc "($Ri + $c)" 0 $L)
+    (0 #calc "-1*($Ri + $c)" $L) 
+    (#calc "-1*($Ri + $c)" 0 $L)
+    (#calc "-1*$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" $L)
+
+);
+
+blocks
+(
+
+    hex (0 1 6 5 10 11 16 15) (#calc "$xMesh + $xMeshAdd" $yMesh $zMesh) simpleGrading (((0.2 0.5 #calc "1/$xGrade")(0.8 0.5 1)) 1 1) 	// Top right 
+    hex (1 2 7 6 11 12 17 16) ($xMesh $yMesh $zMesh) simpleGrading (1 1 1)	// Bottom right
+    hex (2 3 8 7 12 13 18 17) ($xMesh $yMesh $zMesh) simpleGrading (1 1 1)	// Bottom left
+    hex (3 4 9 8 13 14 19 18) (#calc "$xMesh + $xMeshAdd" $yMesh $zMesh) simpleGrading (((0.8 0.5 1)(0.2 0.5 $xGrade)) 1 1)	// Top Left
+
+);
+
+edges
+(
+    arc 0 1 (#calc "$Coeff*$Ri" #calc "$Coeff*$Ri" 0)
+    arc 1 2 (#calc "$Coeff*$Ri" #calc "-1*$Coeff*$Ri" 0)
+    arc 2 3 (#calc "-1*$Coeff*$Ri" #calc "-1*$Coeff*$Ri" 0)
+    arc 3 4 (#calc "-1*$Coeff*$Ri" #calc "$Coeff*$Ri" 0)
+
+    arc 5 6 (#calc "$Coeff*($Ri + $c)" #calc "$Coeff*($Ri + $c)" 0)
+    arc 6 7 (#calc "$Coeff*($Ri + $c)" #calc "-1*$Coeff*($Ri + $c)" 0)
+    arc 7 8 (#calc "-1*$Coeff*($Ri + $c)" #calc "-1*$Coeff*($Ri + $c)" 0)
+    arc 8 9 (#calc "-1*$Coeff*($Ri + $c)" #calc "$Coeff*($Ri + $c)" 0)
+
+    arc 10 11 (#calc "$Coeff*$Ri" #calc "$Coeff*$Ri" $L)
+    arc 11 12 (#calc "$Coeff*$Ri" #calc "-1*$Coeff*$Ri" $L)
+    arc 12 13 (#calc "-1*$Coeff*$Ri" #calc "-1*$Coeff*$Ri" $L)
+    arc 13 14 (#calc "-1*$Coeff*$Ri" #calc "$Coeff*$Ri" $L)
+
+    arc 15 16 (#calc "$Coeff*($Ri + $c)" #calc "$Coeff*($Ri + $c)" $L)
+    arc 16 17 (#calc "$Coeff*($Ri + $c)" #calc "-1*$Coeff*($Ri + $c)" $L)
+    arc 17 18 (#calc "-1*$Coeff*($Ri + $c)" #calc "-1*$Coeff*($Ri + $c)" $L)
+    arc 18 19 (#calc "-1*$Coeff*($Ri + $c)" #calc "$Coeff*($Ri + $c)" $L)
+);
+
+boundary
+(
+
+    film_to_shaft
+    {
+	    type 		mappedWall;
+	    sampleMode		nearestPatchFaceAMI;
+	    sampleRegion	shaft;
+	    samplePatch		shaft_to_film;
+        faces
+        (
+	 	(0 1 11 10)
+		(1 2 12 11)
+		(2 3 13 12)
+		(3 4 14 13)
+        );
+    }
+
+    film_to_bush
+    {
+	    type 		mappedWall;
+	    sampleMode		nearestPatchFaceAMI;
+	    sampleRegion	bush;
+	    samplePatch		bush_to_film;
+        faces
+        (
+	 	(5 15 16 6)
+		(6 16 17 7)
+		(7 17 18 8)
+		(8 18 19 9)
+        );
+    }    
+
+    filmsides 
+    {
+        type patch;
+        faces
+        (
+	 	(0 5 6 1)
+		(1 6 7 2)
+		(2 7 8 3)
+		(3 8 9 4)
+		(10 11 16 15)
+		(11 12 17 16)
+		(12 13 18 17)
+		(18 13 14 19)
+        );
+    } 
+    
+    filminlet_to_groove
+    {
+	    type 		mappedPatch;
+	    sampleMode		nearestPatchFaceAMI;
+	    sampleRegion	groove;
+	    samplePatch		groove_to_filminlet;
+
+	    faces
+	    (
+	     	(4 9 19 14)
+	    );
+    }
+    
+    filmoutlet_to_groove
+    {
+	    type 		mappedPatch;
+	    sampleMode		nearestPatchFaceAMI;
+	    sampleRegion	groove;
+	    samplePatch		groove_to_filmoutlet;
+
+	    faces
+	    (
+	     	(0 10 15 5)
+	    );
+    }
+);
+
+mergePatchPairs
+(
+);
+// ************************************************************************* //

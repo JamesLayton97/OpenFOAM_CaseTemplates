@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Removes data files output from OpenFOAM without removing processor directories
+# Ideal for Restarting run with same number of procs
+rm -rf 0.* 1* 2* 3* 4* 5* 6* 7* 8* 9* log.* 
+
+for dir in processor*; do 
+	cd $dir
+	rm -rf 0.* 1* 2* 3* 4* 5* 6* 7* 8* 9* log.* testDir
+	cd ..
+done
+

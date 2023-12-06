@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Removes mesh data files from the constant directory
+# Ideal for when changing mesh geometry
+rm -rf constant/polyMesh
+for dir in film film3D bush shaft groove; do 
+	rm -rf constant/$dir/polyMesh
+done
+
+rm -rf dynamicCode

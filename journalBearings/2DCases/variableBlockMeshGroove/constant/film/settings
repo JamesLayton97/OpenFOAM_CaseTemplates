@@ -1,0 +1,33 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      settings;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+meshC   0.0001492;
+c       0.000145;
+e       0.7;
+eUpper  1;
+eLower 	0;
+R       0.05;
+L       0.08;
+omega   156;
+psi     -1.2;
+misalignmentAngle 0;
+misalignmentCenter (0 0 0.04);
+targetLoad	4000;
+journalTemp  	293;
+gFactor 	0.8;
+
+// ************************************************************************* //

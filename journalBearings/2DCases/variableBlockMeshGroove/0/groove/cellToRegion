@@ -1,0 +1,52 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0/fluidOutlet";
+    object      cellToRegion;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 3;
+
+boundaryField
+{
+    groove_to_bush
+    {
+        type            zeroGradient;
+    }
+    groovesupply
+    {
+        type            zeroGradient;
+    }
+    groove_to_shaft
+    {
+        type            zeroGradient;
+    }
+    groove_to_filminlet
+    {
+        type            zeroGradient;
+    }
+    groove_to_filmoutlet
+    {
+        type            zeroGradient;
+    }
+    groovesides
+    {
+        type            zeroGradient;
+    }
+
+}
+
+
+// ************************************************************************* //

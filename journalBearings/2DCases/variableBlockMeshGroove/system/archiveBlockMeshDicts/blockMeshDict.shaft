@@ -1,0 +1,175 @@
+/*--------------------------------*-C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open SourceCFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+/* Blockmesh file for constructing the shaft mesh.
+ * Construcuted as 5 block sections positioned circumferentially 
+ * 1 block streches along the groove region, 2 adjacent blocks stetch to the horizontal plane and the final 2 comprise the 2 bottom quaters of the shaft.
+ * To improve meshing and prevent wedge cells with high aspect ratios near the center, an axial hole is placed in the shaft.
+ * iven the highly isothermal nature of the shaft in operationg, the axial hole has negligible affect of the temperature solution
+ */
+
+// Converts mm to m
+convertToMeters         0.001;  
+
+// Meshing Dimensions
+xMesh                   50;	// Number of cells along a circumferential section (not the full circumference) 	
+xMeshAdd		20;
+xGrade			0.05;
+xMeshGroove		20; 	// Number of cells circumferentially along the groove section
+yMesh                   20;	// Number of cells radially
+yGrade			0.01;	// Radial cell expansion coefficient
+zMesh                   1;	// Number of cells along the length
+
+// Bearing dimensions
+Ro			50;		// Shaft radius
+Ri                      20;		// Inner hole radius
+L                       0.1;
+c                       #calc "$Ro - $Ri";
+
+// Angular coordinates for nodes and ars
+Coeff                   0.707107; 		// cos(45)
+
+grooveAng		0.157;
+xg 			#calc "sin($grooveAng)";	// Angular coordinates of the groove inlet/outlet	
+yg			#calc "cos($grooveAng)";
+
+
+vertices
+(
+
+ 	// Shaft boundary rear edges
+    (#calc "$xg*$Ri" #calc "$yg*$Ri" 0)
+    (#calc "$Ri" 0 0)
+    (0 #calc "-1*$Ri" 0) 
+    (#calc "-1*$Ri" 0 0)
+    (#calc "-1*$xg*$Ri" #calc "$yg*$Ri" 0)
+
+ 	// Bush boundary rear edges
+    (#calc "$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" 0)
+    (#calc "($Ri + $c)" 0 0)
+    (0 #calc "-1*($Ri + $c)" 0) 
+    (#calc "-1*($Ri + $c)" 0 0)
+    (#calc "-1*$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" 0)
+
+	// Shaft boundary front edges
+    (#calc "$xg*$Ri" #calc "$yg*$Ri" $L)
+    (#calc "$Ri" 0 $L)
+    (0 #calc "-1*$Ri" $L) 
+    (#calc "-1*$Ri" 0 $L)
+    (#calc "-1*$xg*$Ri" #calc "$yg*$Ri" $L)
+
+ 	// Bush boundary front edges
+    (#calc "$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" $L)
+    (#calc "($Ri + $c)" 0 $L)
+    (0 #calc "-1*($Ri + $c)" $L) 
+    (#calc "-1*($Ri + $c)" 0 $L)
+    (#calc "-1*$xg*($Ri + $c)" #calc "$yg*($Ri + $c)" $L)
+
+);
+
+blocks
+(
+
+    hex (0 1 6 5 10 11 16 15) (#calc "$xMesh + $xMeshAdd" $yMesh $zMesh) simpleGrading (((0.2 0.5 #calc "1/$xGrade")(0.8 0.5 1)) $yGrade 1) 	// Top right 
+    hex (1 2 7 6 11 12 17 16) ($xMesh $yMesh $zMesh) simpleGrading (1 $yGrade 1)	// Bottom right
+    hex (2 3 8 7 12 13 18 17) ($xMesh $yMesh $zMesh) simpleGrading (1 $yGrade 1)	// Bottom left
+    hex (3 4 9 8 13 14 19 18) (#calc "$xMesh + $xMeshAdd" $yMesh $zMesh) simpleGrading (((0.8 0.5 1)(0.2 0.5 $xGrade)) $yGrade 1)	// Top Left
+    hex (4 0 5 9 14 10 15 19) ($xMeshGroove $yMesh $zMesh) simpleGrading (1 $yGrade 1)	// Top under the groove
+);
+
+edges
+(
+    arc 0 1 (#calc "$Coeff*$Ri" #calc "$Coeff*$Ri" 0)
+    arc 1 2 (#calc "$Coeff*$Ri" #calc "-1*$Coeff*$Ri" 0)
+    arc 2 3 (#calc "-1*$Coeff*$Ri" #calc "-1*$Coeff*$Ri" 0)
+    arc 3 4 (#calc "-1*$Coeff*$Ri" #calc "$Coeff*$Ri" 0)
+    arc 4 0 (0 #calc "$Ri" 0)
+
+    arc 5 6 (#calc "$Coeff*($Ri + $c)" #calc "$Coeff*($Ri + $c)" 0)
+    arc 6 7 (#calc "$Coeff*($Ri + $c)" #calc "-1*$Coeff*($Ri + $c)" 0)
+    arc 7 8 (#calc "-1*$Coeff*($Ri + $c)" #calc "-1*$Coeff*($Ri + $c)" 0)
+    arc 8 9 (#calc "-1*$Coeff*($Ri + $c)" #calc "$Coeff*($Ri + $c)" 0)
+    arc 9 5 (0 #calc "($Ri + $c)" 0)
+
+    arc 10 11 (#calc "$Coeff*$Ri" #calc "$Coeff*$Ri" $L)
+    arc 11 12 (#calc "$Coeff*$Ri" #calc "-1*$Coeff*$Ri" $L)
+    arc 12 13 (#calc "-1*$Coeff*$Ri" #calc "-1*$Coeff*$Ri" $L)
+    arc 13 14 (#calc "-1*$Coeff*$Ri" #calc "$Coeff*$Ri" $L)
+    arc 14 10 (0 #calc "$Ri" $L)
+
+    arc 15 16 (#calc "$Coeff*($Ri + $c)" #calc "$Coeff*($Ri + $c)" $L)
+    arc 16 17 (#calc "$Coeff*($Ri + $c)" #calc "-1*$Coeff*($Ri + $c)" $L)
+    arc 17 18 (#calc "-1*$Coeff*($Ri + $c)" #calc "-1*$Coeff*($Ri + $c)" $L)
+    arc 18 19 (#calc "-1*$Coeff*($Ri + $c)" #calc "$Coeff*($Ri + $c)" $L)
+    arc 19 15 (0 #calc "($Ri + $c)" $L)
+);
+
+boundary
+(
+
+    shaftinner
+    {
+	    type 		wall;
+        faces
+        (
+	 	(0 1 11 10)
+		(1 2 12 11)
+		(2 3 13 12)
+		(3 4 14 13)
+		(4 0 10 14)
+        );
+    }
+
+    shaft_to_film
+    {
+	    type 		mappedWall;
+	    sampleMode		nearestPatchFaceAMI;
+	    sampleRegion	film3D;
+	    samplePatch		film_to_shaft;
+        faces
+        (
+	 	(5 15 16 6)
+		(6 16 17 7)
+		(7 17 18 8)
+		(8 18 19 9)
+		(9 19 15 5)
+        );
+    }    
+
+    shaftsides 
+    {
+        type patch;
+        faces
+        (
+	 	(0 5 6 1)
+		(1 6 7 2)
+		(2 7 8 3)
+		(3 8 9 4)
+		(10 11 16 15)
+		(11 12 17 16)
+		(12 13 18 17)
+		(18 13 14 19)
+		(4 9 5 0)
+		(14 10 15 19)
+        );
+    } 
+
+);
+
+mergePatchPairs
+(
+);
+// ************************************************************************* //

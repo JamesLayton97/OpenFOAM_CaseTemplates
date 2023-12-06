@@ -1,0 +1,9 @@
+#!/bin/bash
+
+blockMesh -dict system/blockMeshDict.film
+mv constant/polyMesh constant/film/
+
+blockMesh -dict system/blockMeshDict.film3D
+mv constant/polyMesh constant/film3D/
+
+

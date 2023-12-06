@@ -1,0 +1,4 @@
+#!/bin/bash
+
+blockMesh -dict system/blockMeshDict.shaft
+mv constant/polyMesh constant/shaft/

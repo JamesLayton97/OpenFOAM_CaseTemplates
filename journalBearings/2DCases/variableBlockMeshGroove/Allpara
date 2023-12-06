@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Define parameter range
+omegaStart=156
+omegaEnd=416
+omegaStep=52
+loadStart=3000
+loadEnd=10000
+loadStep=1000
+start=`date`
+
+mkdir filmRegionData
+mkdir openFOAMData
+mkdir centerlineData
+mkdir residualPlots
+mkdir VTKData
+
+# Make directories and dummy files for outputs of parametric sweep
+paraSweepLogFile="./parametricSweepLog"
+paraSweepResultsFile="./parametricSweepResults.csv"
+
+# Print start time and column labels in results file
+printf "Start Time: $start\n" >> $paraSweepLogFile
+printf "Omega(rad/s),Eccentricity,Load(N),AngleOffset(rad),MaximumPressure(MPa),MaximumFilmTemperature(K),MaximumBushTemperature(K),MaximumDeformation(um),MinimumFilmThickness(um),Dilation(um),MaximumShaftTemperature(K),supplyFlowRate(l/min),runTime(s),iterations\n" >> $paraSweepResultsFile
+
+count=0
+	
+./Alldecompose
+
+for omega in $(seq $omegaStart $omegaStep $omegaEnd)
+do
+	for load in $(seq $loadStart $loadStep $loadEnd)
+	do
+		cp -r ./constant/film/settingsTemplate ./constant/film/settings
+		cp -r ./constant/film/loadTemplate ./constant/film/loadConvergence
+		cp -r ./constant/shaft/shaftTemplate ./constant/shaft/shaftProperties
+
+		sed -i "s/LOAD/$load/g" ./constant/film/loadConvergence
+		sed -i "s/OMEGA/$omega/g" ./constant/film/settings
+		sed -i "s/OMEGA/$omega/g" ./constant/shaft/shaftProperties
+
+		(( count++ ))
+		printf "\nIteration: 	 	$count\n" >> $paraSweepLogFile
+		printf "Omega:	 		$omega\n" >> $paraSweepLogFile
+		printf "Load:			$load\n" >> $paraSweepLogFile
+			
+		./Allrunparallel
+		./AllpostProcess $omega $load
+		./Allclean
+	done
+done
+
+end=`date`
+
+cp -r centerlineData ./openFOAMData/
+cp -r parametricSweepResults.csv ./openFOAMData/
+
+printf "Start Time: $start\n" >> $paraSweepLogFile
+printf "Finsh Time: $end\n" >> $paraSweepLogFile

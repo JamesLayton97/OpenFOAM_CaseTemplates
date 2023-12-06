@@ -1,0 +1,68 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0/TEHL";
+    object      relRho;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 1;
+
+boundaryField
+{
+    filmsides
+    {
+        type 		codedMixed;
+	value 		$internalField;
+
+	refValue 	$internalField;
+	refGradient 	uniform 0;
+	valueFraction 	uniform 1;
+
+	name		codedPhiBoundary;
+	
+	code
+	#{
+		scalarField& field = *this;
+		const scalarField internal = this->patchInternalField();
+		volScalarField g = db().lookupObject<volScalarField>("g");
+
+		label patchId = g.mesh().boundaryMesh().findPatchID("filmsides");
+
+		const scalarField gInternal = g.boundaryFieldRef()[patchId].patchInternalField();
+
+		this->valueFraction() = gInternal;	
+	#}; 	
+    }
+    filminlet_to_groove
+    {
+        type            fixedValue;
+        value           uniform 1.008;
+    }
+    filmoutlet_to_groove
+    {
+        type            zeroGradient;
+    }
+    film_to_bush 
+    {
+        type            zeroGradient;
+    }
+    film_to_shaft
+    {
+        type            zeroGradient;
+    }
+}
+
+
+// ************************************************************************* //
